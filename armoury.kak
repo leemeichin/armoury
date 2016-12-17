@@ -36,7 +36,7 @@ decl -hidden str armourydir %{ %sh{
 def -hidden -allow-override armoury-packages ''
 
 def -hidden -params 1 equip %{ %sh{
-  repo=%{kak_opt_armourydir}/$(basename %arg{1})
+  repo=$kak_opt_armourydir/$(basename %arg{1})
   
   if [ ! -d "$repo" ]; then
     git clone git@github.com:%arg{1} "$repo"
@@ -44,7 +44,7 @@ def -hidden -params 1 equip %{ %sh{
 } }
 
 def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
-  for repo in %{kak_opt_armourydir}/*; do
+  for repo in $kak_opt_armourydir/*; do
     if [ -d "$repo" ]; then
       (cd "$repo" && git pull --rebase origin master)
     fi
@@ -52,7 +52,7 @@ def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
 } }
 
 def armoury-init -docstring 'Fetch and load all equipped packages' %{
-  %sh{ mkdir -p %{kak_opt_armourydir} }
+  %sh{ mkdir -p $kak_opt_armourydir }
   armoury-packages # install any missing packages
   armoury-autoload
 }
@@ -74,5 +74,5 @@ def -hidden armoury-autoload %{ %sh{
     done
   }
 
-  autoload %{kak_opt_armourydir}
+  autoload $kak_opt_armourydir
 } }
