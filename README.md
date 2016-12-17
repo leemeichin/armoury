@@ -25,8 +25,10 @@ armoury-equip %{
 }
 ```
 
-When initialising, Armoury will clone each package from GitHub and make sure it is loaded.
-Currently there is no support for other git hosting services.
+When initialising, Armoury will clone each package from GitHub and make sure it is loaded. This will
+happen in the background so it doesn't slow the editor down :)
+
+If something doesn't appear to work as expected, you can check the `*armoury*` buffer for any errors.
 
 ## Updating packages
 
@@ -41,6 +43,14 @@ By default, packages are downloaded to `~/.config/kak/armoury`, but you can chan
 ```kak
 set global armourydir /my/new/directory
 ```
+
+## Limitations
+
+- Only github repositories are supported
+- Specific versions of a package cannot be equipped, only the latest from master
+- Using `set` to configure an option will fail when that option hasn't yet loaded
+  (Workaround: put your `set` configs inside a `KakBegin` hook)
+- Packages must be cleaned up manually with `armoury-clean` for the time being
 
 ## Contributing
 
