@@ -23,7 +23,7 @@ def -hidden armoury-packages %{
   equip mawww/kak-ycmd
 }
 
-hook global KakBegin .* %{armoury-init}
+armoury-init
 ```
 
 When initialising, Armoury will clone each package from GitHub and make sure it is loaded.
