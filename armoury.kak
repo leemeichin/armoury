@@ -14,7 +14,7 @@
 # # equip any packages from github in the same way
 # }
 #
-# hook global KakBegin .* %{armoury-init}
+# armoury-init
 # ```
 #
 # Updating Packages:
@@ -29,19 +29,19 @@
 # For most users this is the same as ~/.config/kak/armoury.
 
 
-decl -hidden str armourydir %{ %sh{
- echo "${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury"
-} }
+decl -hidden str armourydir %sh{
+ echo ${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury
+}
 
 def -hidden armoury-packages %{
   echo -debug "No packages defined! You need to load them in your kakrc."
 }
 
 def -hidden -params 1 equip %{ %sh{
-  repo=$kak_opt_armourydir/$(basename %arg{1})
+  repo=$kak_opt_armourydir/$(basename $1)
   
   if [ ! -d "$repo" ]; then
-    git clone git@github.com:%arg{1} "$repo"
+    git clone git@github.com:$1 "$repo"
   fi
 } }
 
