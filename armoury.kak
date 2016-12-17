@@ -33,7 +33,9 @@ decl -hidden str armourydir %{ %sh{
  echo "${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury"
 } }
 
-def -hidden -allow-override armoury-packages ''
+def -hidden armoury-packages %{
+  echo -debug "No packages defined! You need to load them in your kakrc."
+}
 
 def -hidden -params 1 equip %{ %sh{
   repo=$kak_opt_armourydir/$(basename %arg{1})
@@ -53,7 +55,7 @@ def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
 
 def armoury-init -docstring 'Fetch and load all equipped packages' %{
   %sh{ mkdir -p $kak_opt_armourydir }
-  armoury-packages # install any missing packages
+  armoury-packages
   armoury-autoload
 }
 
