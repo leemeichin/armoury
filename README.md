@@ -19,7 +19,7 @@ Armoury tries to work similarly to similar package scripts like [vim-plug](https
 To load packages, add this to your `kakrc`:
 
 ```kak
-armoury-init %{
+armoury-equip %{
   mawww/kak-ycmd
   lenorf/kakoune-extras
 }

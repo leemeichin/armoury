@@ -9,9 +9,9 @@
 # loaded.
 #
 # ```
-# def armoury-init %{
-#   equip mawww/kak-ycmd
-# # equip any packages from github in the same way
+# def armoury-equip %{
+#   mawww/kak-ycmd
+# # add any packages from github in the same way
 # }
 # ```
 #
@@ -55,9 +55,21 @@ def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
   }"
 } }
 
+def armoury-clean -docstring 'Remove unused packages' %{ %sh{
+  cache=$kak_opt_armourydir/.armoury_cache
+  for package in $kak_opt_armourydir; do
+    repo=$kak_opt_armourydir/$package
+    if grep -Fxqv "$repo" $cache; then
+      rm -r $repo
+    fi
+  done
+} }
+
 def armoury-equip -hidden -params 1 -docstring 'Fetch and load all equipped packages' %{
   %sh{ 
     mkdir -p $kak_opt_armourydir 
+
+    cache=$kak_opt_armourydir/.armoury_cache
 
     output=$(mktemp -d -t kak-armoury-install.XXXXXXXX)/fifo
     mkfifo $output
@@ -69,6 +81,7 @@ def armoury-equip -hidden -params 1 -docstring 'Fetch and load all equipped pack
       if [ ! -d $repo ]; then
         (echo "Installing $package" > $output 2>&1) > /dev/null 2>&1 < /dev/null &
         (git clone git@github.com:$package $repo > $output 2>&1) > /dev/null 2>&1 < /dev/null &
+        echo $repo >> $cache
       fi
     done <<< "$1"
 
