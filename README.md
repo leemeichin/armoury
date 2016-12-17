@@ -20,7 +20,8 @@ To load packages, add this to your `kakrc`:
 
 ```kak
 armoury-init %{
-  equip mawww/kak-ycmd
+  mawww/kak-ycmd
+  lenorf/kakoune-extras
 }
 ```
 
