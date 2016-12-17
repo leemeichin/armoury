@@ -29,27 +29,27 @@
 # For most users this is the same as ~/.config/kak/armoury.
 
 
-decl -hidden str armourydir %sh{
- ${XDG_CONFIG_HOME:-$HOME}/kak/armoury
-}
+decl -hidden str armourydir %{ %sh{
+ echo "${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury"
+} }
 
 def -hidden -allow-override armoury-packages ''
 
-def -hidden -params 1 equip %sh{
-  repo=%{kak_opt_armourydir}/%arg{1}
+def -hidden -params 1 equip %{ %sh{
+  repo=%{kak_opt_armourydir}/$(basename %arg{1})
   
   if [ ! -d "$repo" ]; then
     git clone git@github.com:%arg{1} "$repo"
   fi
-}
+} }
 
-def armoury-update -docstring 'Update all the equipped armoury packages' %sh{
+def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
   for repo in %{kak_opt_armourydir}/*; do
     if [ -d "$repo" ]; then
       (cd "$repo" && git pull --rebase origin master)
     fi
   done
-}
+} }
 
 def armoury-init -docstring 'Fetch and load all equipped packages' %{
   %sh{ mkdir -p %{kak_opt_armourydir} }
@@ -57,7 +57,7 @@ def armoury-init -docstring 'Fetch and load all equipped packages' %{
   armoury-autoload
 }
 
-def -hidden armoury-autoload %sh{
+def -hidden armoury-autoload %{ %sh{
   autoload () {
     local dir=$1
 
@@ -75,4 +75,4 @@ def -hidden armoury-autoload %sh{
   }
 
   autoload %{kak_opt_armourydir}
-}
+} }
