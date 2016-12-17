@@ -9,12 +9,10 @@
 # loaded.
 #
 # ```
-# def armoury-packages %{
+# def armoury-init %{
 #   equip mawww/kak-ycmd
 # # equip any packages from github in the same way
 # }
-#
-# armoury-init
 # ```
 #
 # Updating Packages:
@@ -33,10 +31,6 @@ decl -hidden str armourydir %sh{
  echo ${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury
 }
 
-def -hidden armoury-packages %{
-  echo -debug "No packages defined! You need to load them in your kakrc."
-}
-
 def -hidden -params 1 equip %{ %sh{
   repo=$kak_opt_armourydir/$(basename $1)
   
@@ -53,9 +47,15 @@ def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
   done
 } }
 
-def armoury-init -docstring 'Fetch and load all equipped packages' %{
-  %sh{ mkdir -p $kak_opt_armourydir }
-  armoury-packages
+def -hidden -params 1 -docstring 'Fetch and load all equipped packages' armoury-init %{
+  %sh{ 
+    mkdir -p $kak_opt_armourydir 
+
+    while read -r package; do
+      echo "try %{ ${package} } catch %{ echo -debug Init: could not '${package}' }"
+    done <<< "$1"
+  }
+
   armoury-autoload
 }
 

@@ -19,11 +19,9 @@ Armoury tries to work similarly to similar package scripts like [vim-plug](https
 To load packages, add this to your `kakrc`:
 
 ```kak
-def -hidden armoury-packages %{
+armoury-init %{
   equip mawww/kak-ycmd
 }
-
-armoury-init
 ```
 
 When initialising, Armoury will clone each package from GitHub and make sure it is loaded.
