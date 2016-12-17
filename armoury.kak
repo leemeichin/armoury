@@ -31,13 +31,7 @@ decl -hidden str armourydir %sh{
  echo ${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury
 }
 
-def -hidden -params 1 equip %{ %sh{
-  repo=$kak_opt_armourydir/$(basename $1)
-  
-  if [ ! -d "$repo" ]; then
-    git clone git@github.com:$1 "$repo"
-  fi
-} }
+decl int _install_current_line 0
 
 def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
   for repo in $kak_opt_armourydir/*; do
@@ -47,19 +41,36 @@ def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
   done
 } }
 
-def -hidden -params 1 -docstring 'Fetch and load all equipped packages' armoury-init %{
+def armoury-equip -hidden -params 1 -docstring 'Fetch and load all equipped packages' %{
   %sh{ 
     mkdir -p $kak_opt_armourydir 
 
+    output=$(mktemp -d -t kak-armoury-install.XXXXXXXX)/fifo
+    mkfifo $output
+
     while read -r package; do
-      echo "try %{ ${package} } catch %{ echo -debug Init: could not '${package}' }"
+      repo=$kak_opt_armourydir/$(basename "$package")
+
+      if [ ! -d $(basename "$package") ]; then
+        (git clone git@github.com:$package $repo > $output 2>&1) > /dev/null 2>&1 < /dev/null &
+      fi
     done <<< "$1"
+
+    printf %s\\n "try %{
+      edit! -fifo $output -scroll *install*
+      set buffer filetype text
+      set buffer _install_current_line 0
+      hook -group fifo buffer BufCloseFifo .* %{
+        nop %sh{ rm -r $(dirname $output) }
+        rmhooks buffer fifo
+      }
+    }"
   }
 
   armoury-autoload
 }
 
-def -hidden armoury-autoload %{ %sh{
+def armoury-autoload -hidden %{ %sh{
   autoload () {
     local dir=$1
 
