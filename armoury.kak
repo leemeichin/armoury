@@ -34,11 +34,25 @@ decl -hidden str armourydir %sh{
 decl int _install_current_line 0
 
 def armoury-update -docstring 'Update all the equipped armoury packages' %{ %sh{
-  for repo in $kak_opt_armourydir/*; do
-    if [ -d "$repo" ]; then
-      (cd "$repo" && git pull --rebase origin master)
+  output=$(mktemp -d -t kak-armoury-update.XXXXXXXX)/fifo
+  mkfifo $output
+
+  for package in $kak_opt_armourydir/*; do
+    if [ -d "$package" ]; then
+      (echo "Updating $package" > $output 2>&1) > /dev/null 2>&1 < /dev/null &
+      (cd "$package" && git pull origin master > $output 2>&1) > /dev/null 2>&1 < /dev/null &
     fi
   done
+
+  printf %s\\n "try %{
+    edit! -fifo $output -scroll *armoury*
+    set buffer filetype text
+    set buffer _install_current_line 0
+    hook -group fifo buffer BufCloseFifo .* %{
+      nop %sh{ rm -r $(dirname $output) }
+      rmhooks buffer fifo
+    }
+  }"
 } }
 
 def armoury-equip -hidden -params 1 -docstring 'Fetch and load all equipped packages' %{
@@ -48,16 +62,18 @@ def armoury-equip -hidden -params 1 -docstring 'Fetch and load all equipped pack
     output=$(mktemp -d -t kak-armoury-install.XXXXXXXX)/fifo
     mkfifo $output
 
+    (echo "Equipping new packages" > $output 2>&1) > /dev/null 2>&1 < /dev/null &
+
     while read -r package; do
       repo=$kak_opt_armourydir/$(basename "$package")
-
-      if [ ! -d $(basename "$package") ]; then
+      if [ ! -d $repo ]; then
+        (echo "Installing $package" > $output 2>&1) > /dev/null 2>&1 < /dev/null &
         (git clone git@github.com:$package $repo > $output 2>&1) > /dev/null 2>&1 < /dev/null &
       fi
     done <<< "$1"
 
     printf %s\\n "try %{
-      edit! -fifo $output -scroll *install*
+      edit! -fifo $output -scroll *armoury*
       set buffer filetype text
       set buffer _install_current_line 0
       hook -group fifo buffer BufCloseFifo .* %{
