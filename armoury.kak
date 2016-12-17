@@ -30,13 +30,13 @@
 
 
 decl -hidden str armourydir %sh{
- ${XDG_CONFIG_HOME:$HOME}/kak/armoury
+ ${XDG_CONFIG_HOME:-$HOME}/kak/armoury
 }
 
 def -hidden -allow-override armoury-packages ''
 
-def -hidden -params 1 equip %sh{	
-  local repo=%{kak_opt_armourydir}/%arg{1}
+def -hidden -params 1 equip %sh{
+  repo=%{kak_opt_armourydir}/%arg{1}
   
   if [ ! -d "$repo" ]; then
     git clone git@github.com:%arg{1} "$repo"
@@ -52,6 +52,7 @@ def armoury-update -docstring 'Update all the equipped armoury packages' %sh{
 }
 
 def armoury-init -docstring 'Fetch and load all equipped packages' %{
+  %sh{ mkdir -p %{kak_opt_armourydir} }
   armoury-packages # install any missing packages
   armoury-autoload
 }
