@@ -28,7 +28,7 @@
 
 
 decl -hidden str armourydir %sh{
- echo ${XDG_CONFIG_HOME:-$HOME/.config}/kak/armoury
+ echo ${XDG_CONFIG_HOME:-$HOME/.config}/kak/autoload
 }
 
 decl int _install_current_line 0
@@ -66,21 +66,17 @@ def armoury-clean -docstring 'Remove unused packages' %{ %sh{
 } }
 
 def armoury-equip -hidden -params 1 -docstring 'Fetch and load all equipped packages' %{
-  %sh{ 
+  %sh{
     mkdir -p $kak_opt_armourydir 
-
     cache=$kak_opt_armourydir/.armoury_cache
-
     output=$(mktemp -d -t kak-armoury-install.XXXXXXXX)/fifo
     mkfifo $output
-
-    (echo "Equipping new packages" > $output 2>&1) > /dev/null 2>&1 < /dev/null &
 
     while read -r package; do
       repo=$kak_opt_armourydir/$(basename "$package")
       if [ ! -d $repo ]; then
         (echo "Installing $package" > $output 2>&1) > /dev/null 2>&1 < /dev/null &
-        (git clone git@github.com:$package $repo > $output 2>&1) > /dev/null 2>&1 < /dev/null &
+        (git clone --depth=1 git@github.com:$package $repo > $output 2>&1) > /dev/null 2>&1 < /dev/null &
         echo $repo >> $cache
       fi
     done <<< "$1"

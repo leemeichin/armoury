@@ -38,11 +38,13 @@ the latest commits on the master branch.
 
 ## Configuration
 
-By default, packages are downloaded to `~/.config/kak/armoury`, but you can change this.
+By default, packages are downloaded to `~/.config/kak/autoload`, but you can change this.
 
 ```kak
-set global armourydir /my/new/directory
+set global armourydir %sh{ echo ~/my/new/directory }
 ```
+
+Echoing from a shell is required to expand your home directory.
 
 ## Limitations
 
